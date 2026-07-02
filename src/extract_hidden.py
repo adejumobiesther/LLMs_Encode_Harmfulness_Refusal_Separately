@@ -276,7 +276,7 @@ def generate_directions(
         Mean difference tensor or None if computation fails
     """
     def tokenize_instructions_fn(instructions: List[str], use_persuade: bool = False, use_sys: bool = False) -> dict:
-        inps = [formatInp_llama_persuasion(i, use_persuade, use_ss=use_sys, use_template=True) for i in instructions]
+        inps = [formatInp_llama_persuasion(i, use_persuade, model=MODEL, use_ss=use_sys, use_template=True) for i in instructions]
         return tokenizer(inps, padding=True, return_tensors="pt")
 
     model_block_modules = model_base.model.layers
