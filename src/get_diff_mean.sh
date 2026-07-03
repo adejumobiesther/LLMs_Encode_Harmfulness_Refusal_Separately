@@ -13,8 +13,8 @@ python -u ../src/extract_hidden.py \
 	--right $8 \
 	--random_sample_harmful $9 \
 	--model "${10}" \
-	--extract_hidden_inst_token 1 \
-	--extract_harmful_token_only 0 \
 	--batch_size 1 \
 	--ret_whole_seq 0 \
+	--model_size "7b" \
+	--load_ckpt 0 \
 	--mode_dir "${11}"

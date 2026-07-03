@@ -12,7 +12,6 @@ import contextlib
 import functools
 import random
 
-
 MODEL = ''
 NUM_TOKEN_HIDDEN = 2  # by default, we extract NUM_TOKEN_HIDDEN tokens + all special post-instruction tokens
 
@@ -122,6 +121,7 @@ def get_mean_activations_fwd_hook(
                 exit()
     return hook_fn
 
+
 def get_mean_activations(
     model: AutoModelForCausalLM,
     tokenizer: AutoTokenizer,
@@ -187,8 +187,9 @@ def get_mean_activations(
 
     mean_activations = result.mean(dim=1)
     print('mean shape', mean_activations.shape)
-
     return mean_activations, result
+
+
 
 def get_mean_diff(
     model: AutoModelForCausalLM,
@@ -276,7 +277,7 @@ def generate_directions(
         Mean difference tensor or None if computation fails
     """
     def tokenize_instructions_fn(instructions: List[str], use_persuade: bool = False, use_sys: bool = False) -> dict:
-        inps = [formatInp_llama_persuasion(i, use_persuade, model=MODEL, use_ss=use_sys, use_template=True) for i in instructions]
+        inps = [formatInp_llama_persuasion(i, use_persuade, use_ss=use_sys, use_template=True) for i in instructions]
         return tokenizer(inps, padding=True, return_tensors="pt")
 
     model_block_modules = model_base.model.layers
@@ -327,8 +328,7 @@ def main() -> None:
     parser.add_argument('--positions', default='-1', type=str, help='Positions to extract')
     parser.add_argument('--extract_only', default=0, type=int, help='Only extract harmful activations')
     parser.add_argument('--ret_whole_seq', default=0, type=int, help='Return whole sequence')
-    parser.add_argument('--extract_hidden_inst_token', default=0, type=int, help="Extract hidden state of instruction tokens")
-    parser.add_argument('--extract_harmful_token_only', default=0, type=int, help="Extract harmful token only")
+    parser.add_argument('--extract_hidden_inst_token', default=1, type=int, help="Extract hidden state of instruction tokens")
     parser.add_argument('--mode_dir', default='hf', type=str, help="Mode for direction extraction: 'hf' or 'refuse'")
     
     args = parser.parse_args()
@@ -340,7 +340,7 @@ def main() -> None:
     params['positions'] = list(map(int, params['positions'].split()))
     MODEL = params['model']
     llama_2_model_path = "NousResearch/Llama-2-7b-chat-hf"
-    if MODEL == 'llama':
+    if MODEL == 'llama2':
         model = AutoModelForCausalLM.from_pretrained(
             llama_2_model_path,
             cache_dir='models/llama',
@@ -371,8 +371,6 @@ def main() -> None:
         inst_token = "[/INST]"
         if params['model'] == 'llama3':
             inst_token = "<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n"
-        elif params['model'] == 'vicuna':
-            inst_token = 'ASSISTANT:\n'
         elif params['model'] == 'qwen':
             inst_token = '<|im_end|>\n<|im_start|>assistant'
             
